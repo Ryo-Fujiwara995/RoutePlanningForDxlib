@@ -30,22 +30,22 @@ void Player::Update()
 {
 	int ox = pos_.x, oy = pos_.y;
 
-	if (Input::IsKeepKeyDown(KEY_INPUT_UP))
+	if (Input::IsKeepKeyDown(KEY_INPUT_UP) || Input::IsKeepKeyDown(KEY_INPUT_W))
 	{
 		pos_.y--;
 		inputDir = UP;
 	}
-	else if (Input::IsKeepKeyDown(KEY_INPUT_DOWN))
+	else if (Input::IsKeepKeyDown(KEY_INPUT_DOWN) || Input::IsKeepKeyDown(KEY_INPUT_S))
 	{
 		pos_.y++;
 		inputDir = DOWN;
 	}
-	else if (Input::IsKeepKeyDown(KEY_INPUT_LEFT))
+	else if (Input::IsKeepKeyDown(KEY_INPUT_LEFT) || Input::IsKeepKeyDown(KEY_INPUT_A))
 	{
 		pos_.x--;
 		inputDir = LEFT;
 	}
-	else if (Input::IsKeepKeyDown(KEY_INPUT_RIGHT))
+	else if (Input::IsKeepKeyDown(KEY_INPUT_RIGHT) || Input::IsKeepKeyDown(KEY_INPUT_D))
 	{
 		pos_.x++;
 		inputDir = RIGHT;
