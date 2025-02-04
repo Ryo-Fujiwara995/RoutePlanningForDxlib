@@ -8,7 +8,9 @@ class Enemy :
 {
     Point pos_;
     bool isAlive_;
-    float speed_;
+    float speed_ = 2.0;
+
+    Point targetPos_;
 public:
     Enemy();
     ~Enemy();

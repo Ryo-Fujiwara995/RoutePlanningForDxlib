@@ -87,3 +87,9 @@ Point Stage::GetRandomEmptyPosition()
 	}
 	return { CHA_WIDTH, CHA_HEIGHT };
 }
+
+bool Stage::IsPassable(int gridX, int gridY) {
+	if (gridX < 0 || gridX >= STAGE_WIDTH || gridY < 0 || gridY >= STAGE_HEIGHT)
+		return false;
+	return stageData[gridY][gridX] == STAGE_OBJ::EMPTY;
+}

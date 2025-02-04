@@ -30,5 +30,7 @@ public:
 
 	// Enemyをランダムに表示させる -> デフォルトランダム→決め打ち→関数作ってどうにかこうにか
 	Point GetRandomEmptyPosition();
+	// 通路と通路　Stageに通行可能かどうか返す
+	bool IsPassable(int gridX, int gridY);
 };
 
