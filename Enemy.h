@@ -11,6 +11,8 @@ class Enemy :
     float speed_ = 2.0;
 
     Point targetPos_;
+    int moveTimer_;
+    Point currentMove_;
 public:
     Enemy();
     ~Enemy();
