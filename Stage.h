@@ -27,5 +27,8 @@ public:
 	STAGE_OBJ GetStageData(int x, int y) {return stageData[y][x];}
 	vector<Rect> GetStageRects() { return stageRects; }
 	void setStageRects();
+
+	// Enemyをランダムに表示させる -> デフォルトランダム→決め打ち→関数作ってどうにかこうにか
+	Point GetRandomEmptyPosition();
 };
 

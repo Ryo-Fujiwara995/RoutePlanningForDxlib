@@ -5,20 +5,29 @@
 Enemy::Enemy()
 {
     isAlive_ = true;
-    pos_ = { CHA_WIDTH + 64, CHA_HEIGHT + 64 };
+    // Enemyの初期位置をランダムに決める
+    Stage* stage = FindGameObject<Stage>();
+    if (stage){
+        pos_ = stage->GetRandomEmptyPosition();
+    }
+    else{
+        // Stageがなかったら、初期位置に
+        pos_ = { CHA_WIDTH + 64, CHA_HEIGHT + 64 };
+    }
+
 }
 
 Enemy::~Enemy()
 {
 }
-// EnemyをランダムにPlayerに追随させたい
+// Enemyをランダム移動されるPlayerのことは考えずに
 void Enemy::Update()
 {
     // 現在の座標を保存
     int ox = pos_.x, oy = pos_.y;
 
     // ランダムな移動量を決定
-    // GetRand(3) は 0,1,2 を返すので、 -1～+1 に変換するために「-1」します。
+    // GetRand(3) は 0,1,2 を返すので、 -1～+1 に変換するために-1
     Point move = { GetRand(3) - 1, GetRand(3) - 1 };
     pos_.x += move.x;
     pos_.y += move.y;
