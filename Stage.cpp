@@ -1,26 +1,110 @@
 #include "Stage.h"
 #include "./globals.h"
+#include <stack>
 
-Stage::Stage()
-{
-	stageData = vector(STAGE_HEIGHT, vector<STAGE_OBJ>(STAGE_WIDTH, STAGE_OBJ::EMPTY));
-	for (int y = 0; y < STAGE_HEIGHT; y++)
+// Stage迷路
+namespace StageMaze {
+	std::stack<Point> prStack;
+
+	void DigDug(int x, int y, vector<vector<STAGE_OBJ>>& _stage)
 	{
-		for (int x = 0; x < STAGE_WIDTH; x++)
-		{
-			if (y == 0 || y == STAGE_HEIGHT - 1 || x == 0 || x == STAGE_WIDTH - 1)
+		_stage[y][x] = STAGE_OBJ::EMPTY;
+		Point Dir[]{ {0,-1},{1, 0},{0, 1},{-1,0} };
+		std::vector<int> dList;
+		for (int i = 0; i < 4; i++) {
+			//nextを0~3まで回してでたーを取得
+			Point next = Point{ x + Dir[i].x, y + Dir[i].y };
+			Point nextNext = { next.x + Dir[i].x, next.y + Dir[i].y };
+			if (nextNext.x < 0 || nextNext.y < 0 || nextNext.x > STAGE_WIDTH - 1 || nextNext.y > STAGE_HEIGHT - 1)
+				continue;
+
+			if (_stage[nextNext.y][nextNext.x] == STAGE_OBJ::WALL)
 			{
-				stageData[y][x] = STAGE_OBJ::WALL;
+				dList.push_back(i);
 			}
-			else
-			{
-				if (x % 2 == 0 && y % 2 == 0)
-					stageData[y][x] = STAGE_OBJ::WALL;
+		}
+		if (dList.empty())
+		{
+			return;
+		}
+		int nrand = rand() % dList.size();
+		int tmp = dList[nrand];
+
+		Point next = { x + Dir[tmp].x, y + Dir[tmp].y };
+		Point nextNext = { next.x + Dir[tmp].x, next.y + Dir[tmp].y };
+
+		_stage[next.y][next.x] = STAGE_OBJ::EMPTY;
+		_stage[nextNext.y][nextNext.x] = STAGE_OBJ::EMPTY;
+
+		prStack.push(nextNext);
+		DigDug(nextNext.x, nextNext.y, _stage);
+	}
+
+
+	void AllWall(int w, int h, vector<vector<STAGE_OBJ>>& _stage)
+	{
+		for (int j = 0; j < h; j++)
+		{
+			for (int i = 0; i < w; i++) {
+				if (i == 0 || j == 0 || i == w - 1 || j == h - 1)
+					_stage[j][i] = STAGE_OBJ::EMPTY;
 				else
-					stageData[y][x] = STAGE_OBJ::EMPTY;
+					_stage[j][i] = STAGE_OBJ::WALL;
 			}
 		}
 	}
+
+	void MakeMazeDigDug(int w, int h, vector<vector<STAGE_OBJ>>& _stage)
+	{
+		AllWall(w, h, _stage);
+		Point sp{ 1, 1 };
+		prStack.push(sp);
+		while (!prStack.empty())
+		{
+			sp = prStack.top();
+			prStack.pop();
+			DigDug(sp.x, sp.y, _stage);
+		}
+		for (int j = 0; j < h; j++)
+		{
+			for (int i = 0; i < w; i++)
+			{
+				if (i == 0 || j == 0 || i == w - 1 || j == h - 1)
+					_stage[j][i] = STAGE_OBJ::WALL;
+				continue;
+			}
+		}
+	}
+
+}
+
+
+Stage::Stage()
+{
+	
+	stageData = vector(STAGE_HEIGHT, vector<STAGE_OBJ>(STAGE_WIDTH, STAGE_OBJ::EMPTY));
+
+	// ボンバーマン的なやつ
+	//for (int y = 0; y < STAGE_HEIGHT; y++)
+	//{
+	//	for (int x = 0; x < STAGE_WIDTH; x++)
+	//	{
+	//		if (y == 0 || y == STAGE_HEIGHT - 1 || x == 0 || x == STAGE_WIDTH - 1)
+	//		{
+	//			stageData[y][x] = STAGE_OBJ::WALL;
+	//		}
+	//		else
+	//		{
+	//			if (x % 2 == 0 && y % 2 == 0)
+	//				stageData[y][x] = STAGE_OBJ::WALL;
+	//			else
+	//				stageData[y][x] = STAGE_OBJ::EMPTY;
+	//		}
+	//	}
+	//}
+	//setStageRects();
+
+	StageMaze::MakeMazeDigDug(STAGE_WIDTH, STAGE_HEIGHT, stageData);
 	setStageRects();
 }
 
@@ -47,7 +131,7 @@ void Stage::Draw()
 				DrawBox(x * CHA_WIDTH, y * CHA_HEIGHT, x * CHA_WIDTH + CHA_WIDTH, y * CHA_HEIGHT + CHA_HEIGHT, GetColor(119, 136, 153), TRUE);
 				break;
 			case STAGE_OBJ::GOAL:
-			
+				// ゴールはないよ！
 				break;
 			default:
 				break;
@@ -68,7 +152,6 @@ void Stage::setStageRects()
 			}
 		}
 	}
-
 }
 
 Point Stage::GetRandomEmptyPosition()
