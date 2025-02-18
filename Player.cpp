@@ -93,7 +93,7 @@ void Player::Update()
 			}
 			else
 			{
-				//それ以外で引っ掛かった時（いつやん）
+				//それ以外で引っ掛かった時
 				pos_.x = ox;
 				pos_.y = oy;
 			}
@@ -108,11 +108,7 @@ void Player::Draw()
 
 bool Player::CheckHit(const Rect& me, const Rect& other)
 {
-	if (me.x < other.x + other.w &&
-		me.x + me.w > other.x &&
-		me.y < other.y + other.h &&
-		me.y + me.h > other.y)
-	{
+	if (me.x < other.x + other.w && me.x + me.w > other.x && me.y < other.y + other.h && me.y + me.h > other.y) {
 		return true;
 	}
 	return false;

@@ -81,7 +81,7 @@ namespace StageMaze {
 
 Stage::Stage()
 {
-	
+
 	stageData = vector(STAGE_HEIGHT, vector<STAGE_OBJ>(STAGE_WIDTH, STAGE_OBJ::EMPTY));
 
 	// ボンバーマン的なやつ
@@ -148,7 +148,7 @@ void Stage::setStageRects()
 		{
 			if (stageData[y][x] == STAGE_OBJ::WALL)
 			{
-				stageRects.push_back(Rect(x * CHA_WIDTH, y * CHA_HEIGHT,  CHA_WIDTH, CHA_HEIGHT));
+				stageRects.push_back(Rect(x * CHA_WIDTH, y * CHA_HEIGHT, CHA_WIDTH, CHA_HEIGHT));
 			}
 		}
 	}
@@ -157,14 +157,14 @@ void Stage::setStageRects()
 Point Stage::GetRandomEmptyPosition()
 {
 	vector<Point> emptyPositions;
-	for (int y = 0; y < STAGE_HEIGHT; y++){
-		for (int x = 0; x < STAGE_WIDTH; x++){
-			if (stageData[y][x] == STAGE_OBJ::EMPTY){
+	for (int y = 0; y < STAGE_HEIGHT; y++) {
+		for (int x = 0; x < STAGE_WIDTH; x++) {
+			if (stageData[y][x] == STAGE_OBJ::EMPTY) {
 				emptyPositions.push_back({ x * CHA_WIDTH, y * CHA_HEIGHT });
 			}
 		}
 	}
-	if (!emptyPositions.empty()){
+	if (!emptyPositions.empty()) {
 		int index = GetRand(emptyPositions.size());
 		return emptyPositions[index];
 	}

@@ -18,7 +18,6 @@ class Enemy :
     std::vector<Point> path_;
     int pathIndex_;
 
-
     DIR forward_;
 
     bool chaseMode_;  // true: A*‚É‚æ‚éPlayer’Ç”ö, false: ƒ‰ƒ“ƒ_ƒ€ˆÚ“®

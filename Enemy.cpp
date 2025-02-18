@@ -77,7 +77,6 @@ namespace {
                     continue;
                 if (findNode(closedList, nx, ny))
                     continue;
-
                 int tentativeG = current->g + 1;
                 Node* neighbor = findNode(openList, nx, ny);
                 if (!neighbor) {
@@ -147,9 +146,10 @@ void Enemy::Update()
     int dx = pos_.x - playerPos.x;
     int dy = pos_.y - playerPos.y;
     int distSq = dx * dx + dy * dy;
-
-    // ○○セル分（＝○○*CHA_WIDTH）の距離以内なら追尾モード 5って範囲狭い...??
-    const int rangeThresholdSq = (300 * CHA_WIDTH) * (300 * CHA_WIDTH);
+    // 追尾範囲　x,y同じ
+    int chaseRange = 10;
+    // ○○セル分（＝○○*CHA_WIDTH）の距離以内なら追尾モード defalut 5って範囲狭い...??
+    const int rangeThresholdSq = (chaseRange * CHA_WIDTH) * (chaseRange * CHA_WIDTH);
     if (distSq <= rangeThresholdSq)
         chaseMode_ = true;
     else
@@ -242,7 +242,7 @@ void Enemy::Draw()
 {
     DrawBox(pos_.x, pos_.y, pos_.x + CHA_WIDTH, pos_.y + CHA_HEIGHT,GetColor(80, 89, 10), TRUE);
 
-    // Randomモードの場合は、向いている方向を示す三角形を描画
+    // Randomモードの場合は、ウロチョロ、向いている方向を示す三角形を描画
     if (!chaseMode_) {
         Point tp[4][3] = {
             { {pos_.x + CHA_WIDTH / 2, pos_.y},
