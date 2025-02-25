@@ -3,9 +3,11 @@
 #include "../Stage.h"
 #include "../Player.h"
 #include "../Enemy.h"
+#include <ctime>
 
 PlayScene::PlayScene()
 {
+	srand(time(NULL)); // —”‚Ì‰Šú‰»
 	new Stage();
 	new Player();
 	new Enemy();
