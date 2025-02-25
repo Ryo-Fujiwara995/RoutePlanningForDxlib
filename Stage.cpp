@@ -176,3 +176,4 @@ bool Stage::IsPassable(int gridX, int gridY) {
 		return false;
 	return stageData[gridY][gridX] == STAGE_OBJ::EMPTY;
 }
+//XY軸で近づく　ランダムで曲がる　まっすぐ進む　→1/3の確率で

@@ -158,7 +158,7 @@ void Enemy::Update()
     int enemySpeed = 1;  // 移動速度
 
     if (chaseMode_) { // chaseMode_ 2つしかないからboolでいいか
-        // 追尾モード: A*でPlayerまでの経路を求め
+        // 追尾モード: A*でPlayerまでの経路を求める
         Point enemyGrid = { pos_.x / CHA_WIDTH, pos_.y / CHA_HEIGHT };
         Point playerGrid = { playerPos.x / CHA_WIDTH, playerPos.y / CHA_HEIGHT };
 
@@ -193,7 +193,7 @@ void Enemy::Update()
                 if (pos_.y < targetPixel.y)
                     pos_.y = targetPixel.y;
             }
-            // ノードが到達したら、は次のノードにいく
+            // ノードが到達したら、次のノードにいく
             if (pos_.x == targetPixel.x && pos_.y == targetPixel.y)
                 pathIndex_++;
         }
@@ -245,18 +245,10 @@ void Enemy::Draw()
     // Randomモードの場合は、ウロチョロ、向いている方向を示す三角形を描画
     if (!chaseMode_) {
         Point tp[4][3] = {
-            { {pos_.x + CHA_WIDTH / 2, pos_.y},
-              {pos_.x, pos_.y + CHA_HEIGHT / 2},
-              {pos_.x + CHA_WIDTH, pos_.y + CHA_HEIGHT / 2} },
-            { {pos_.x + CHA_WIDTH / 2, pos_.y + CHA_HEIGHT},
-              {pos_.x, pos_.y + CHA_HEIGHT / 2},
-              {pos_.x + CHA_WIDTH, pos_.y + CHA_HEIGHT / 2} },
-            { {pos_.x, pos_.y + CHA_HEIGHT / 2},
-              {pos_.x + CHA_WIDTH / 2, pos_.y},
-              {pos_.x + CHA_WIDTH / 2, pos_.y + CHA_HEIGHT} },
-            { {pos_.x + CHA_WIDTH, pos_.y + CHA_HEIGHT / 2},
-              {pos_.x + CHA_WIDTH / 2, pos_.y},
-              {pos_.x + CHA_WIDTH / 2, pos_.y + CHA_HEIGHT} }
+            { {pos_.x + CHA_WIDTH / 2, pos_.y                 }, {pos_.x                , pos_.y + CHA_HEIGHT / 2},{pos_.x + CHA_WIDTH    , pos_.y + CHA_HEIGHT / 2} },
+            { {pos_.x + CHA_WIDTH / 2, pos_.y + CHA_HEIGHT    }, {pos_.x                , pos_.y + CHA_HEIGHT / 2},{pos_.x + CHA_WIDTH    , pos_.y + CHA_HEIGHT / 2} },
+            { {pos_.x                , pos_.y + CHA_HEIGHT / 2}, {pos_.x + CHA_WIDTH / 2, pos_.y                 },{pos_.x + CHA_WIDTH / 2, pos_.y + CHA_HEIGHT    } },
+            { {pos_.x + CHA_WIDTH    , pos_.y + CHA_HEIGHT / 2}, {pos_.x + CHA_WIDTH / 2, pos_.y                 },{pos_.x + CHA_WIDTH / 2, pos_.y + CHA_HEIGHT    } }
         };
         DrawTriangle(   tp[forward_][0].x, tp[forward_][0].y,
                         tp[forward_][1].x, tp[forward_][1].y,
