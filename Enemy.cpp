@@ -13,6 +13,9 @@ Enemy::Enemy()
 // デストラクタ
 Enemy::~Enemy()
 {
+    const char a = 9;
+    const int c = 0;
+    const int v = 1;
 }
 
 // 更新処理
