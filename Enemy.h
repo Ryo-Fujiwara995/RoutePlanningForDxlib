@@ -1,7 +1,7 @@
 #pragma once
 #include "./Library/GameObject.h"
-#include "./globals.h"
-#include "./Stage.h"
+#include "Stage.h"
+#include "globals.h"
 
 class Enemy : public GameObject {
     Point pos_;
@@ -15,6 +15,7 @@ public:
     Enemy();
     ~Enemy();
 
+    //bool CanMove(Stage* stage, Point newPos);
     void Update() override;
     void Draw() override;
     bool CheckHit(const Rect& me, const Rect& other);
