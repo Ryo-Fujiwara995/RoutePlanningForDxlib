@@ -16,9 +16,6 @@ namespace {
     Point nDir[4] = { {0, -1}, {0, 1}, {-1, 0}, {1, 0} };
 }
 // 右手と左手→幅優先→ダイクストラ→...の順でやったので、右左だけ追跡速度が一緒。他は、めちゃ速い
-// --------------------------------------------------
-// ボーナス要素
-// --------------------------------------------------
 // 右手法
 namespace RightHandRule {
     // 右手法での移動方向
@@ -202,9 +199,7 @@ namespace LeftHandRule {
     }
 
 }
-// --------------------------------------------------
 
-// できた！
 // 幅優先探索
 namespace BreadthFirstSearch {
     std::vector<Point> FindPath(Stage* stage, Point start, Point goal) {
@@ -259,7 +254,6 @@ namespace BreadthFirstSearch {
 
 }
 
-// できた！
 // 深さ優先探索
 namespace DepthFirstSearch {
     std::vector<Point> FindPath(Stage* stage, Point start, Point goal) {
@@ -314,7 +308,6 @@ namespace DepthFirstSearch {
     }
 }
 
-// できた！
 // ダイクストラ法
 namespace Dijkstra {
 
@@ -387,7 +380,6 @@ namespace Dijkstra {
     }
 }
 
-// できた！！　オプション
 // A*
 namespace AStar {
 
@@ -486,7 +478,6 @@ namespace AStar {
         return path;
     }
 }
-// ここまで A*アルゴリズム
 
 Enemy::Enemy()
     : pos_({ 0, 0 }), isAlive_(true), targetPos_({ 0, 0 }),
@@ -508,14 +499,85 @@ Enemy::~Enemy()
 void Enemy::Imgui()
 {
     // ImGuiウィンドウの表示
-    ImGui::Begin("EnemyModeWindow");
-    // 日本語を使う場合は、u8をつける　つけないとエラー
+    ImGui::Begin(u8"Enemyモード切り替え");
+
+    // 日本語を使う場合は、u8をつける
     ImGui::Text(u8"Enemyのモードを選んでください");
 
-    // ボタン（押しても何もしない）
-    if (ImGui::Button("Close Window")) {
-        // ここでウィンドウを閉じる処理を追加することも可能
+    // 現在の状態を表示
+    ImGui::Text(u8"Enemyのモードの状態は、○○です");
+
+    Stage* stage = (Stage*)FindGameObject<Stage>();
+    if (!stage) {
+        ImGui::Text(u8"ステージ情報が取得できません");
+        ImGui::End();
+        return;
     }
+
+    // ボタン押しただけで、Enemyの位置をリセットするのでコメントアウト
+    //// Enemyの位置をリセット
+    //if (ImGui::Button(u8"Enemyの位置をリセットする")) {
+    //    pos_ = stage->GetRandomEmptyPosition(); // ランダムな空きマスに移動
+    //    path_.clear(); // 経路リセット
+    //    pathIndex_ = 0;
+    //}
+
+    // ランダム移動 適当にうろうろ
+    if (ImGui::Button(u8"ランダム移動")) {
+        chaseMode_ = EnemyMode::Random;
+        pos_ = stage->GetRandomEmptyPosition();
+        path_.clear();
+        pathIndex_ = 0;
+    }
+
+    // 右手法
+    if (ImGui::Button(u8"右手法")) {
+        chaseMode_ = EnemyMode::RightHand;
+        pos_ = stage->GetRandomEmptyPosition();
+        path_.clear();
+        pathIndex_ = 0;
+    }
+
+    // 左手法
+    if (ImGui::Button(u8"左手法")) {
+        chaseMode_ = EnemyMode::LeftHand;
+        pos_ = stage->GetRandomEmptyPosition();
+        path_.clear();
+        pathIndex_ = 0;
+    }
+
+    // 幅優先探索（BFS）
+    if (ImGui::Button(u8"幅優先探索")) {
+        chaseMode_ = EnemyMode::Bfs;
+        pos_ = stage->GetRandomEmptyPosition();
+        path_.clear();
+        pathIndex_ = 0;
+    }
+
+    // 深さ優先探索（DFS）
+    if (ImGui::Button(u8"深さ優先探索")) {
+        chaseMode_ = EnemyMode::Dfs;
+        pos_ = stage->GetRandomEmptyPosition();
+        path_.clear();
+        pathIndex_ = 0;
+    }
+
+    // ダイクストラ法
+    if (ImGui::Button(u8"ダイクストラ法")) {
+        chaseMode_ = EnemyMode::Dijkstra;
+        pos_ = stage->GetRandomEmptyPosition();
+        path_.clear();
+        pathIndex_ = 0;
+    }
+
+    // A*
+    if (ImGui::Button("A*")) {
+        chaseMode_ = EnemyMode::AStar;
+        pos_ = stage->GetRandomEmptyPosition();
+        path_.clear();
+        pathIndex_ = 0;
+    }
+
     ImGui::End();
 }
 void Enemy::Update()
@@ -538,18 +600,18 @@ void Enemy::Update()
     int chaseRange = 50;
     const int rangeThresholdSq = (chaseRange * CHA_WIDTH) * (chaseRange * CHA_WIDTH);
 
-    // 一定範囲内にプレイヤーがいる場合、右手法で追跡
-    if (distSq <= rangeThresholdSq) {
-        //chaseMode_ = EnemyMode::RightHand;
-        //chaseMode_ = EnemyMode::LeftHand;
-        //chaseMode_ = EnemyMode::Bfs;
-        chaseMode_ = EnemyMode::Dfs;
-        //chaseMode_ = EnemyMode::Dijkstra;
-        //chaseMode_ = EnemyMode::AStar;
-    }
-    else {
-        chaseMode_ = EnemyMode::Random;
-    }
+    //// 一定範囲内にプレイヤーがいる場合、右手法で追跡
+    //if (distSq <= rangeThresholdSq) {
+    //    //chaseMode_ = EnemyMode::RightHand;
+    //    //chaseMode_ = EnemyMode::LeftHand;
+    //    //chaseMode_ = EnemyMode::Bfs;
+    //    chaseMode_ = EnemyMode::Dfs;
+    //    //chaseMode_ = EnemyMode::Dijkstra;
+    //    //chaseMode_ = EnemyMode::AStar;
+    //}
+    //else {
+    //    chaseMode_ = EnemyMode::Random;
+    //}
 
     Point oldPos = pos_;
     int enemySpeed = 1;
@@ -681,7 +743,6 @@ void Enemy::Update()
         }
         break;
     }
-    // 
     case EnemyMode::Dfs: {
         Point enemyPos = { pos_.x / CHA_WIDTH, pos_.y / CHA_HEIGHT };
         Point playerPos = { player->GetPosition().x / CHA_WIDTH, player->GetPosition().y / CHA_HEIGHT };
@@ -698,7 +759,6 @@ void Enemy::Update()
         }
         break;
     }
-
     case EnemyMode::Dijkstra:{
         // 敵とプレイヤーのマス座標を取得
         Point enemyPos = { pos_.x / CHA_WIDTH, pos_.y / CHA_HEIGHT };
@@ -718,8 +778,6 @@ void Enemy::Update()
         }
         break;
     }
-
-	// できた！！
     case EnemyMode::AStar: {
         Point enemyPos = { pos_.x / CHA_WIDTH, pos_.y / CHA_HEIGHT };
         Point playerPos = { player->GetPosition().x / CHA_WIDTH, player->GetPosition().y / CHA_HEIGHT };
