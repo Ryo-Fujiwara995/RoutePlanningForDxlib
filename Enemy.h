@@ -30,5 +30,7 @@ public:
     void Update() override;
     void Draw() override;
     bool CheckHit(const Rect& me, const Rect& other);
+
+    void Imgui();
    
 };

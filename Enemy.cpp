@@ -9,6 +9,7 @@
 #include <queue>　// BreadthFirstSearch
 #include <map> // 
 #include <stack>
+#include "ImGui/imgui.h"
 //　ループはないよ
 
 namespace {
@@ -504,9 +505,25 @@ Enemy::Enemy()
 Enemy::~Enemy()
 {
 }
+void Enemy::Imgui()
+{
+    // ImGuiウィンドウの表示
+    ImGui::Begin("Enemy Debug Window");
 
+    // ウィンドウ内のテキスト
+    ImGui::Text("This is an ImGui Window for debugging!");
+
+    // ボタン（押しても何もしない）
+    if (ImGui::Button("Close Window")) {
+        // ここでウィンドウを閉じる処理を追加することも可能
+    }
+    ImGui::End();
+}
 void Enemy::Update()
 {
+    // ここらへんで、Imguiを使いたい
+    Imgui();
+
     Stage* stage = (Stage*)FindGameObject<Stage>();
     Player* player = (Player*)FindGameObject<Player>();
     if (!stage || !player)
