@@ -4,15 +4,6 @@
 #include "globals.h"
 
 namespace {
-	//enum DIR
-	//{
-	//	UP,
-	//	DOWN,
-	//	LEFT,
-	//	RIGHT,
-	//	NONE,
-	//	MAXDIR
-	//};
 	DIR inputDir = NONE;
 }
 

@@ -39,3 +39,10 @@
 	
 	const int CHA_WIDTH = 32;
 	const int CHA_HEIGHT = 32;
+
+	enum class EnemyMode {
+		Random,
+		RightHand,
+		LeftHand,
+		AStar
+	};
