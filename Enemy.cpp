@@ -100,7 +100,6 @@ namespace RightHandRule {
     }
 }
 
-// 右手やったから、途中まででいいかな
 // 左手法
 namespace LeftHandRule {
 
@@ -153,22 +152,48 @@ namespace LeftHandRule {
     // 左手法での経路探索
     std::vector<Point> findPath(Point start, Point goal, Stage* stage) {
         std::vector<Point> path;
+
+        // 初期位置
         int x = start.x;
         int y = start.y;
+
+        // 初期方向（右を基準）
         int dir = 0;
-        //while (true) {
-        //    path.push_back({ x, y });
-        //    if (x == goal.x && y == goal.y)
-        //        break;
-        //    int next = findNextDir(x, y, dir, stage);
-        //    if (next == -1)
-        //        break;
-        //    x += dx[next];
-        //    y += dy[next];
-        //    dir = next;
-        //}
+
+        while (true) {
+            path.push_back({ x, y });
+
+            // ゴールに到達したら終了
+            if (x == goal.x && y == goal.y)
+                break;
+
+            // 左手法に従って移動方向を決定
+            int left = leftDir(dir);
+            int forward = forwardDir(dir);
+            int right = rightDir(dir);
+
+            if (canMove(x, y, left, stage)) {
+                dir = left;
+            }
+            else if (canMove(x, y, forward, stage)) {
+                // そのまま前進
+            }
+            else if (canMove(x, y, right, stage)) {
+                dir = right;
+            }
+            else {
+                // どこにも進めない場合、180度回転
+                dir = (dir + 2) % 4;
+            }
+
+            // 次の位置へ移動
+            Point next = move(x, y, dir);
+            x = next.x;
+            y = next.y;
+        }
         return path;
     }
+
 }
 
 // A*
@@ -310,7 +335,8 @@ void Enemy::Update()
 
     // 一定範囲内にプレイヤーがいる場合、右手法で追跡
     if (distSq <= rangeThresholdSq) {
-        chaseMode_ = EnemyMode::RightHand;
+        //chaseMode_ = EnemyMode::RightHand;
+         chaseMode_ = EnemyMode::LeftHand;
     }
     //else {
     //    chaseMode_ = EnemyMode::Random;
@@ -324,6 +350,49 @@ void Enemy::Update()
         // 右手法での経路探索
         if (path_.empty() || pathIndex_ >= path_.size() || (path_.back().x != playerGrid.x || path_.back().y != playerGrid.y)) {
             path_ = RightHandRule::findPath(enemyGrid, playerGrid, stage);
+            pathIndex_ = 0;
+        }
+
+        // 経路に沿って移動
+        if (!path_.empty() && pathIndex_ < path_.size()) {
+            Point nextNode = path_[pathIndex_];
+            Point targetPixel = { nextNode.x * CHA_WIDTH, nextNode.y * CHA_HEIGHT };
+
+            // X軸方向の移動
+            if (pos_.x < targetPixel.x) {
+                pos_.x += enemySpeed;
+                if (pos_.x > targetPixel.x)
+                    pos_.x = targetPixel.x;
+            }
+            else if (pos_.x > targetPixel.x) {
+                pos_.x -= enemySpeed;
+                if (pos_.x < targetPixel.x)
+                    pos_.x = targetPixel.x;
+            }
+
+            // Y軸方向の移動
+            if (pos_.y < targetPixel.y) {
+                pos_.y += enemySpeed;
+                if (pos_.y > targetPixel.y)
+                    pos_.y = targetPixel.y;
+            }
+            else if (pos_.y > targetPixel.y) {
+                pos_.y -= enemySpeed;
+                if (pos_.y < targetPixel.y)
+                    pos_.y = targetPixel.y;
+            }
+
+            // 次のノードに到達したら、インデックスを進める
+            if (pos_.x == targetPixel.x && pos_.y == targetPixel.y) {
+                pathIndex_++;
+            }
+        }
+        break;
+    }
+    case EnemyMode::LeftHand: {
+        // 左手法での経路探索
+        if (path_.empty() || pathIndex_ >= path_.size() || (path_.back().x != playerGrid.x || path_.back().y != playerGrid.y)) {
+            path_ = LeftHandRule::findPath(enemyGrid, playerGrid, stage);
             pathIndex_ = 0;
         }
 
