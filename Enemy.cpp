@@ -508,10 +508,9 @@ Enemy::~Enemy()
 void Enemy::Imgui()
 {
     // ImGuiウィンドウの表示
-    ImGui::Begin("Enemy Debug Window");
-
-    // ウィンドウ内のテキスト
-    ImGui::Text("This is an ImGui Window for debugging!");
+    ImGui::Begin("EnemyModeWindow");
+    // 日本語を使う場合は、u8をつける　つけないとエラー
+    ImGui::Text(u8"Enemyのモードを選んでください");
 
     // ボタン（押しても何もしない）
     if (ImGui::Button("Close Window")) {
