@@ -156,17 +156,17 @@ namespace LeftHandRule {
         int x = start.x;
         int y = start.y;
         int dir = 0;
-        while (true) {
-            path.push_back({ x, y });
-            if (x == goal.x && y == goal.y)
-                break;
-            int next = findNextDir(x, y, dir, stage);
-            if (next == -1)
-                break;
-            x += dx[next];
-            y += dy[next];
-            dir = next;
-        }
+        //while (true) {
+        //    path.push_back({ x, y });
+        //    if (x == goal.x && y == goal.y)
+        //        break;
+        //    int next = findNextDir(x, y, dir, stage);
+        //    if (next == -1)
+        //        break;
+        //    x += dx[next];
+        //    y += dy[next];
+        //    dir = next;
+        //}
         return path;
     }
 }
@@ -299,88 +299,78 @@ void Enemy::Update()
     if (!player)
         return;
 
-
     Point playerPos = player->GetPosition();
+    Point enemyGrid = { pos_.x / CHA_WIDTH, pos_.y / CHA_HEIGHT };
+    Point playerGrid = { playerPos.x / CHA_WIDTH, playerPos.y / CHA_HEIGHT };
+
     int dx = pos_.x - playerPos.x;
     int dy = pos_.y - playerPos.y;
     int distSq = dx * dx + dy * dy;
+    const int rangeThresholdSq = (10 * CHA_WIDTH) * (10 * CHA_WIDTH);
 
-    // 追尾範囲　x,y同じ
-    int chaseRange = 10;
-    // ○○セル分（＝○○*CHA_WIDTH）の距離以内なら追尾モード defalut 5って範囲狭い...??
-    const int rangeThresholdSq = (chaseRange * CHA_WIDTH) * (chaseRange * CHA_WIDTH);
-
-    if (distSq <= rangeThresholdSq)
+    // 一定範囲内にプレイヤーがいる場合、右手法で追跡
+    if (distSq <= rangeThresholdSq) {
         chaseMode_ = EnemyMode::RightHand;
-    else
-        chaseMode_ = EnemyMode::Random;
+    }
+    //else {
+    //    chaseMode_ = EnemyMode::Random;
+    //}
 
     Point oldPos = pos_;
-    int enemySpeed = 1;  // 移動速度
+    int enemySpeed = 1;
 
-    // bool からswitch に変更
     switch (chaseMode_) {
-        // 右手法
     case EnemyMode::RightHand: {
-        Point enemyGrid = { pos_.x / CHA_WIDTH, pos_.y / CHA_HEIGHT };
-        Point playerGrid = { playerPos.x / CHA_WIDTH, playerPos.y / CHA_HEIGHT };
+        // 右手法での経路探索
+        if (path_.empty() || pathIndex_ >= path_.size() || (path_.back().x != playerGrid.x || path_.back().y != playerGrid.y)) {
+            path_ = RightHandRule::findPath(enemyGrid, playerGrid, stage);
+            pathIndex_ = 0;
+        }
 
-        int dir = 0;
-        while (!(enemyGrid.x == playerGrid.x && enemyGrid.y == playerGrid.y)) {
-            int right = RightHandRule::rightDir(dir);
-            int forward = RightHandRule::forwardDir(dir);
-            int left = RightHandRule::leftDir(dir);
+        // 経路に沿って移動
+        if (!path_.empty() && pathIndex_ < path_.size()) {
+            Point nextNode = path_[pathIndex_];
+            Point targetPixel = { nextNode.x * CHA_WIDTH, nextNode.y * CHA_HEIGHT };
 
-            if (RightHandRule::canMove(enemyGrid.x, enemyGrid.y, right, stage)) {
-                dir = right;
+            // X軸方向の移動
+            if (pos_.x < targetPixel.x) {
+                pos_.x += enemySpeed;
+                if (pos_.x > targetPixel.x)
+                    pos_.x = targetPixel.x;
             }
-            else if (RightHandRule::canMove(enemyGrid.x, enemyGrid.y, forward, stage)) {
-                // そのまま前進するので、何もしない
+            else if (pos_.x > targetPixel.x) {
+                pos_.x -= enemySpeed;
+                if (pos_.x < targetPixel.x)
+                    pos_.x = targetPixel.x;
             }
-            else if (RightHandRule::canMove(enemyGrid.x, enemyGrid.y, left, stage)) {
-                dir = left;
+
+            // Y軸方向の移動
+            if (pos_.y < targetPixel.y) {
+                pos_.y += enemySpeed;
+                if (pos_.y > targetPixel.y)
+                    pos_.y = targetPixel.y;
             }
-            else {
-                dir = (dir + 2) % 4;
+            else if (pos_.y > targetPixel.y) {
+                pos_.y -= enemySpeed;
+                if (pos_.y < targetPixel.y)
+                    pos_.y = targetPixel.y;
             }
-            enemyGrid = RightHandRule::move(enemyGrid.x, enemyGrid.y, dir);
-            pos_ = { enemyGrid.x * CHA_WIDTH, enemyGrid.y * CHA_HEIGHT };
+
+            // 次のノードに到達したら、インデックスを進める
+            if (pos_.x == targetPixel.x && pos_.y == targetPixel.y) {
+                pathIndex_++;
+            }
         }
         break;
     }
-    case EnemyMode::LeftHand: {
-        Point enemyGrid = { pos_.x / CHA_WIDTH, pos_.y / CHA_HEIGHT };
-        Point playerGrid = { playerPos.x / CHA_WIDTH, playerPos.y / CHA_HEIGHT };
 
-        int dir = 0;
-        while (!(enemyGrid.x == playerGrid.x && enemyGrid.y == playerGrid.y)) {
-            int left = LeftHandRule::leftDir(dir);
-            int forward = LeftHandRule::forwardDir(dir);
-            int right = LeftHandRule::rightDir(dir);
-
-            if (LeftHandRule::canMove(enemyGrid.x, enemyGrid.y, left, stage)) {
-                dir = left;
-            }
-            else if (LeftHandRule::canMove(enemyGrid.x, enemyGrid.y, forward, stage)) {
-                // そのまま前進するので、何もしない
-            }
-            else if (LeftHandRule::canMove(enemyGrid.x, enemyGrid.y, right, stage)) {
-                dir = right;
-            }
-            else {
-                dir = (dir + 2) % 4;
-            }
-
-            enemyGrid = LeftHandRule::move(enemyGrid.x, enemyGrid.y, dir);
-            pos_ = { enemyGrid.x * CHA_WIDTH, enemyGrid.y * CHA_HEIGHT };
-        }
-        break;
-    }
     case EnemyMode::Random: {
+        // ランダム移動
         Point move = { nDir[forward_].x, nDir[forward_].y };
         pos_.x += move.x;
         pos_.y += move.y;
 
+        // 壁との衝突判定
         Rect eRect = { pos_.x, pos_.y, CHA_WIDTH, CHA_HEIGHT };
         for (auto& obj : stage->GetStageRects()) {
             if (CheckHit(eRect, obj)) {
@@ -394,89 +384,12 @@ void Enemy::Update()
         }
         break;
     }
+
     default:
         break;
     }
-        //    // 追尾モード: A*でPlayerまでの経路を求める
-        //    Point enemyGrid = { pos_.x / CHA_WIDTH, pos_.y / CHA_HEIGHT };
-        //    Point playerGrid = { playerPos.x / CHA_WIDTH, playerPos.y / CHA_HEIGHT };
-
-        //    if (path_.empty() || pathIndex_ >= path_.size() || (path_.back().x != playerGrid.x || path_.back().y != playerGrid.y)) {
-        //        path_ = AStar::findPath(enemyGrid, playerGrid, stage);
-        //        pathIndex_ = 0;
-        //    }
-
-        //    if (!path_.empty() && pathIndex_ < path_.size()) {
-        //        Point nextNode = path_[pathIndex_];
-        //        Point targetPixel = { nextNode.x * CHA_WIDTH, nextNode.y * CHA_HEIGHT };
-
-        //        // X軸方向の補間
-        //        if (pos_.x < targetPixel.x) {
-        //            pos_.x += enemySpeed;
-        //            if (pos_.x > targetPixel.x)
-        //                pos_.x = targetPixel.x;
-        //        }
-        //        else if (pos_.x > targetPixel.x) {
-        //            pos_.x -= enemySpeed;
-        //            if (pos_.x < targetPixel.x)
-        //                pos_.x = targetPixel.x;
-        //        }
-        //        // Y軸方向の補間
-        //        if (pos_.y < targetPixel.y) {
-        //            pos_.y += enemySpeed;
-        //            if (pos_.y > targetPixel.y)
-        //                pos_.y = targetPixel.y;
-        //        }
-        //        else if (pos_.y > targetPixel.y) {
-        //            pos_.y -= enemySpeed;
-        //            if (pos_.y < targetPixel.y)
-        //                pos_.y = targetPixel.y;
-        //        }
-        //        // ノードが到達したら、次のノードにいく
-        //        if (pos_.x == targetPixel.x && pos_.y == targetPixel.y)
-        //            pathIndex_++;
-        //    }
-        //}
-
-
-        //else {
-        //    // Randomモード
-        //    Point move = { nDir[forward_].x, nDir[forward_].y };
-        //    pos_.x += move.x;
-        //    pos_.y += move.y;
-
-        //    // Stageの壁との判定
-        //    Rect eRect = { pos_.x, pos_.y, CHA_WIDTH, CHA_HEIGHT };
-        //    for (auto& obj : stage->GetStageRects()) {
-        //        if (CheckHit(eRect, obj)) {
-        //            pos_ = oldPos;
-        //            forward_ = (DIR)(GetRand(4));
-        //            break;
-        //        }
-        //    }
-        //    if ((pos_.x % CHA_WIDTH == 0) && (pos_.y % CHA_HEIGHT == 0)) {
-        //        forward_ = (DIR)(GetRand(4));
-        //    }
-        //}
-        //// 他にも、壁倒し法、幅優先探索、ダイクストラ法 あるけど
-
-        //Rect enemyRect = { pos_.x, pos_.y, CHA_WIDTH, CHA_HEIGHT };
-        //for (auto& obj : stage->GetStageRects()) {
-        //    if (CheckHit(enemyRect, obj)) {
-        //        Rect testRectX = { oldPos.x, pos_.y, CHA_WIDTH, CHA_HEIGHT };
-        //        Rect testRectY = { pos_.x, oldPos.y, CHA_WIDTH, CHA_HEIGHT };
-        //        if (!CheckHit(testRectX, obj))
-        //            pos_.x = oldPos.x;
-        //        else if (!CheckHit(testRectY, obj))
-        //            pos_.y = oldPos.y;
-        //        else {
-        //            pos_ = oldPos;
-        //        }
-        //        enemyRect = { pos_.x, pos_.y, CHA_WIDTH, CHA_HEIGHT };
-        //    }
-        //}
-    
 }
+
 
 void Enemy::Draw()
 {
