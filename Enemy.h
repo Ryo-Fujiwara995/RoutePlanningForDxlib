@@ -6,13 +6,13 @@
 class Enemy :
     public GameObject
 {
+private:
+
+
     Point pos_;
     bool isAlive_;
-    //float speed_ = 2.0;
 
     Point targetPos_;
-    //int moveTimer_;
-    //Point currentMove_;
 
     // A*‚ÌŒo˜H
     std::vector<Point> path_;
@@ -32,4 +32,3 @@ public:
     bool CheckHit(const Rect& me, const Rect& other);
    
 };
-

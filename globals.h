@@ -4,6 +4,21 @@
 	struct Point
 	{
 		int x, y;
+
+		// “™‰¿”äŠr‰‰Zq
+		bool operator==(const Point& other) const {
+			return x == other.x && y == other.y;
+		}
+
+		// •s“™”äŠr‰‰Zq
+		bool operator!=(const Point& other) const {
+			return !(*this == other);
+		}
+
+		// C2676@ƒGƒ‰[‚ªo‚é‚Ì‚ÅAAA
+		bool operator<(const Point& other) const {
+			return (x < other.x) || (x == other.x && y < other.y);
+		}
 	};
 
 	struct Pointf
@@ -40,9 +55,16 @@
 	const int CHA_WIDTH = 32;
 	const int CHA_HEIGHT = 32;
 
+	// ¬•¶š‚¾‚Á‚½‚Ì‚ÅAŒã‚Å•ÏX
 	enum class EnemyMode {
 		Random,
 		RightHand,
 		LeftHand,
+
+		Bfs,// breadth - first search ¨ •—Dæ’Tõ
+		Dfs,// depth - first search ¨ [‚³—Dæ’Tõ
+		
+		Dijkstra,// Dijkstra Algorithm
+		
 		AStar
 	};

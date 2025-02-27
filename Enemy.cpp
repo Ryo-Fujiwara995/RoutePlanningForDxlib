@@ -6,11 +6,18 @@
 #include <algorithm>
 #include <cstdlib>
 #include <cmath>
-
+#include <queue>　// BreadthFirstSearch
+#include <map> // 
+#include <stack>
+//　ループはないよ
 
 namespace {
     Point nDir[4] = { {0, -1}, {0, 1}, {-1, 0}, {1, 0} };
 }
+// 右手と左手→幅優先→ダイクストラ→...の順でやったので、右左だけ追跡速度が一緒。他は、めちゃ速い
+// --------------------------------------------------
+// ボーナス要素
+// --------------------------------------------------
 // 右手法
 namespace RightHandRule {
     // 右手法での移動方向
@@ -99,7 +106,6 @@ namespace RightHandRule {
         return path;
     }
 }
-
 // 左手法
 namespace LeftHandRule {
 
@@ -195,7 +201,192 @@ namespace LeftHandRule {
     }
 
 }
+// --------------------------------------------------
 
+// できた！
+// 幅優先探索
+namespace BreadthFirstSearch {
+    std::vector<Point> FindPath(Stage* stage, Point start, Point goal) {
+        std::vector<Point> path;
+        if (!stage) return path;
+
+        std::queue<Point> queue;
+        std::map<Point, Point> cameFrom;  // 経路記録用
+        queue.push(start);
+        cameFrom[start] = start;  // 開始地点の親を自身に設定
+
+        Point directions[] = {
+            {0, -1}, {1, 0}, {0, 1}, {-1, 0}  // 上, 右, 下, 左
+        };
+
+        while (!queue.empty()) {
+            Point current = queue.front();
+            queue.pop();
+
+            // ゴールに到達
+            if (current.x == goal.x && current.y == goal.y) {
+                break;
+            }
+
+            for (const auto& dir : directions) {
+                Point next = { current.x + dir.x, current.y + dir.y };
+
+                // 範囲外または通行不可ならスキップ
+                if (!stage->IsPassable(next.x, next.y)) continue;
+
+                // まだ訪れていない場合
+                if (cameFrom.find(next) == cameFrom.end()) {
+                    queue.push(next);
+                    cameFrom[next] = current;
+                }
+            }
+        }
+
+        // 経路を逆順でたどる
+        if (cameFrom.find(goal) != cameFrom.end()) {
+            Point current = goal;
+            while (current.x != start.x || current.y != start.y) {
+                path.push_back(current);
+                current = cameFrom[current];
+            }
+            path.push_back(start);
+            std::reverse(path.begin(), path.end());
+        }
+
+        return path;  // 最短経路を返す
+    }
+
+}
+
+// できた！
+// 深さ優先探索
+namespace DepthFirstSearch {
+    std::vector<Point> FindPath(Stage* stage, Point start, Point goal) {
+        std::vector<Point> path;
+        if (!stage) return path;
+
+        std::stack<Point> stack;
+        std::map<Point, Point> cameFrom; // 経路復元用マップ
+        stack.push(start);
+        cameFrom[start] = start;
+
+        // 4方向の移動
+        Point directions[] = {
+            {0, -1}, {1, 0}, {0, 1}, {-1, 0}  // 上, 右, 下, 左
+        };
+
+        while (!stack.empty()) {
+            Point current = stack.top();
+            stack.pop();
+
+            // ゴールに到達したら探索終了
+            if (current.x == goal.x && current.y == goal.y) {
+                break;
+            }
+
+            // 隣接するマスをチェック
+            for (const auto& dir : directions) {
+                Point next = { current.x + dir.x, current.y + dir.y };
+
+                // 通行可能かチェック
+                if (!stage->IsPassable(next.x, next.y)) continue;
+
+                // まだ訪れていない場合
+                if (cameFrom.find(next) == cameFrom.end()) {
+                    stack.push(next);
+                    cameFrom[next] = current;
+                }
+            }
+        }
+
+        // 経路を逆順でたどる
+        if (cameFrom.find(goal) != cameFrom.end()) {
+            Point current = goal;
+            while (current.x != start.x || current.y != start.y) {
+                path.push_back(current);
+                current = cameFrom[current];
+            }
+            path.push_back(start);
+            std::reverse(path.begin(), path.end());
+        }
+        return path;  // 経路を返す
+    }
+}
+
+// できた！
+// ダイクストラ法
+namespace Dijkstra {
+
+    // 優先度付きキュー用の比較関数（距離が小さい順に処理）
+    struct Compare {
+        bool operator()(const std::pair<int, Point>& a, const std::pair<int, Point>& b) {
+            return a.first > b.first;
+        }
+    };
+
+    std::vector<Point> FindPath(Stage* stage, Point start, Point goal) {
+        std::vector<Point> path;
+        if (!stage) return path;
+
+        // 各座標の最短距離を格納するマップ
+        std::map<Point, int> cost;
+        std::map<Point, Point> cameFrom;  // 経路復元用マップ
+        std::priority_queue<std::pair<int, Point>, std::vector<std::pair<int, Point>>, Compare> pq;
+
+        // 初期設定
+        pq.push({ 0, start });
+        cost[start] = 0;
+        cameFrom[start] = start;
+
+        // 4方向の移動
+        Point directions[] = {
+            {0, -1}, {1, 0}, {0, 1}, {-1, 0}  // 上, 右, 下, 左
+        };
+
+        while (!pq.empty()) {
+            auto [currentCost, current] = pq.top();
+            pq.pop();
+
+            // ゴールに到達したら探索終了
+            if (current.x == goal.x && current.y == goal.y) {
+                break;
+            }
+
+            // 隣接するマスをチェック
+            for (const auto& dir : directions) {
+                Point next = { current.x + dir.x, current.y + dir.y };
+
+                // 通行可能かチェック
+                if (!stage->IsPassable(next.x, next.y)) continue;
+
+                // コストを計算（すべての移動はコスト1）
+                int newCost = cost[current] + 1;
+
+                // より短い距離が見つかった場合、更新
+                if (cost.find(next) == cost.end() || newCost < cost[next]) {
+                    cost[next] = newCost;
+                    pq.push({ newCost, next });
+                    cameFrom[next] = current;
+                }
+            }
+        }
+
+        // 経路を逆順でたどる
+        if (cameFrom.find(goal) != cameFrom.end()) {
+            Point current = goal;
+            while (current.x != start.x || current.y != start.y) {
+                path.push_back(current);
+                current = cameFrom[current];
+            }
+            path.push_back(start);
+            std::reverse(path.begin(), path.end());
+        }
+
+        return path;  // 最短経路を返す
+    }
+}
+
+// できた！！　オプション
 // A*
 namespace AStar {
 
@@ -301,7 +492,7 @@ Enemy::Enemy()
     pathIndex_(0), forward_(RIGHT),
     chaseMode_(EnemyMode::Random) // 初期はランダム移動
 {
-    
+    path_.clear(); // 経路をクリア
     int rx = 0, ry = 0;
     while (rx % 2 == 0 || ry % 2 == 0) {
         rx = GetRand(STAGE_WIDTH - 1);
@@ -317,11 +508,8 @@ Enemy::~Enemy()
 void Enemy::Update()
 {
     Stage* stage = (Stage*)FindGameObject<Stage>();
-    if (!stage)
-        return;
-
     Player* player = (Player*)FindGameObject<Player>();
-    if (!player)
+    if (!stage || !player)
         return;
 
     Point playerPos = player->GetPosition();
@@ -331,21 +519,46 @@ void Enemy::Update()
     int dx = pos_.x - playerPos.x;
     int dy = pos_.y - playerPos.y;
     int distSq = dx * dx + dy * dy;
-    const int rangeThresholdSq = (10 * CHA_WIDTH) * (10 * CHA_WIDTH);
+    int chaseRange = 50;
+    const int rangeThresholdSq = (chaseRange * CHA_WIDTH) * (chaseRange * CHA_WIDTH);
 
     // 一定範囲内にプレイヤーがいる場合、右手法で追跡
     if (distSq <= rangeThresholdSq) {
         //chaseMode_ = EnemyMode::RightHand;
-         chaseMode_ = EnemyMode::LeftHand;
+        //chaseMode_ = EnemyMode::LeftHand;
+        //chaseMode_ = EnemyMode::Bfs;
+        chaseMode_ = EnemyMode::Dfs;
+        //chaseMode_ = EnemyMode::Dijkstra;
+        //chaseMode_ = EnemyMode::AStar;
     }
-    //else {
-    //    chaseMode_ = EnemyMode::Random;
-    //}
+    else {
+        chaseMode_ = EnemyMode::Random;
+    }
 
     Point oldPos = pos_;
     int enemySpeed = 1;
 
     switch (chaseMode_) {
+    case EnemyMode::Random: {
+        // ランダム移動
+        Point move = { nDir[forward_].x, nDir[forward_].y };
+        pos_.x += move.x;
+        pos_.y += move.y;
+
+        // 壁との衝突判定
+        Rect eRect = { pos_.x, pos_.y, CHA_WIDTH, CHA_HEIGHT };
+        for (auto& obj : stage->GetStageRects()) {
+            if (CheckHit(eRect, obj)) {
+                pos_ = oldPos;
+                forward_ = (DIR)(GetRand(4));
+                break;
+            }
+        }
+        if ((pos_.x % CHA_WIDTH == 0) && (pos_.y % CHA_HEIGHT == 0)) {
+            forward_ = (DIR)(GetRand(4));
+        }
+        break;
+    }
     case EnemyMode::RightHand: {
         // 右手法での経路探索
         if (path_.empty() || pathIndex_ >= path_.size() || (path_.back().x != playerGrid.x || path_.back().y != playerGrid.y)) {
@@ -432,24 +645,78 @@ void Enemy::Update()
         }
         break;
     }
+    // 追尾速いけどいいか...
+    case EnemyMode::Bfs: {
+        // 敵とプレイヤーのマス座標を取得
+        Point enemyPos = { pos_.x / CHA_WIDTH, pos_.y / CHA_HEIGHT };
+        Point playerPos = { player->GetPosition().x / CHA_WIDTH, player->GetPosition().y / CHA_HEIGHT };
 
-    case EnemyMode::Random: {
-        // ランダム移動
-        Point move = { nDir[forward_].x, nDir[forward_].y };
-        pos_.x += move.x;
-        pos_.y += move.y;
-
-        // 壁との衝突判定
-        Rect eRect = { pos_.x, pos_.y, CHA_WIDTH, CHA_HEIGHT };
-        for (auto& obj : stage->GetStageRects()) {
-            if (CheckHit(eRect, obj)) {
-                pos_ = oldPos;
-                forward_ = (DIR)(GetRand(4));
-                break;
-            }
+        // BFS で経路を取得（プレイヤーの動きに即座に対応）
+        if (path_.empty()) {
+            path_ = BreadthFirstSearch::FindPath(stage, enemyPos, playerPos);
         }
-        if ((pos_.x % CHA_WIDTH == 0) && (pos_.y % CHA_HEIGHT == 0)) {
-            forward_ = (DIR)(GetRand(4));
+
+        // プレイヤーと速度を揃えて1マスずつ追尾
+        if (!path_.empty()) {
+            Point next = path_.front();
+            path_.erase(path_.begin()); // 先頭を削除して次の地点へ
+            pos_.x = next.x * CHA_WIDTH;
+            pos_.y = next.y * CHA_HEIGHT;
+        }
+        break;
+    }
+    // 
+    case EnemyMode::Dfs: {
+        Point enemyPos = { pos_.x / CHA_WIDTH, pos_.y / CHA_HEIGHT };
+        Point playerPos = { player->GetPosition().x / CHA_WIDTH, player->GetPosition().y / CHA_HEIGHT };
+
+        if (path_.empty()) {
+            path_ = DepthFirstSearch::FindPath(stage, enemyPos, playerPos);
+        }
+
+        if (!path_.empty()) {
+            Point next = path_.front();
+            path_.erase(path_.begin());
+            pos_.x = next.x * CHA_WIDTH;
+            pos_.y = next.y * CHA_HEIGHT;
+        }
+        break;
+    }
+
+    case EnemyMode::Dijkstra:{
+        // 敵とプレイヤーのマス座標を取得
+        Point enemyPos = { pos_.x / CHA_WIDTH, pos_.y / CHA_HEIGHT };
+        Point playerPos = { player->GetPosition().x / CHA_WIDTH, player->GetPosition().y / CHA_HEIGHT };
+
+        // ダイクストラ法で経路を計算
+        if (path_.empty()) {
+            path_ = Dijkstra::FindPath(stage, enemyPos, playerPos);
+        }
+
+        // 経路がある場合、次のマスへ移動
+        if (!path_.empty()) {
+            Point next = path_.front();
+            path_.erase(path_.begin()); // 先頭を削除して次の地点へ
+            pos_.x = next.x * CHA_WIDTH;
+            pos_.y = next.y * CHA_HEIGHT;
+        }
+        break;
+    }
+
+	// できた！！
+    case EnemyMode::AStar: {
+        Point enemyPos = { pos_.x / CHA_WIDTH, pos_.y / CHA_HEIGHT };
+        Point playerPos = { player->GetPosition().x / CHA_WIDTH, player->GetPosition().y / CHA_HEIGHT };
+
+        if (path_.empty()) {
+            path_ = AStar::findPath(enemyPos, playerPos, stage);
+        }
+
+        if (!path_.empty()) {
+            Point next = path_.front();
+            path_.erase(path_.begin());
+            pos_.x = next.x * CHA_WIDTH;
+            pos_.y = next.y * CHA_HEIGHT;
         }
         break;
     }
@@ -464,45 +731,6 @@ void Enemy::Draw()
 {
     // 敵の基本描画（四角形）
     DrawBox(pos_.x, pos_.y, pos_.x + CHA_WIDTH, pos_.y + CHA_HEIGHT, GetColor(80, 89, 10), TRUE);
-
-    // 移動モードに応じた三角形の方向表示
-    Point tp[4][3] = {
-        { {pos_.x + CHA_WIDTH / 2, pos_.y                 }, {pos_.x                , pos_.y + CHA_HEIGHT / 2},{pos_.x + CHA_WIDTH    , pos_.y + CHA_HEIGHT / 2} }, // 上向き
-        { {pos_.x + CHA_WIDTH / 2, pos_.y + CHA_HEIGHT    }, {pos_.x                , pos_.y + CHA_HEIGHT / 2},{pos_.x + CHA_WIDTH    , pos_.y + CHA_HEIGHT / 2} }, // 下向き
-        { {pos_.x                , pos_.y + CHA_HEIGHT / 2}, {pos_.x + CHA_WIDTH / 2, pos_.y                 },{pos_.x + CHA_WIDTH / 2, pos_.y + CHA_HEIGHT    } }, // 左向き
-        { {pos_.x + CHA_WIDTH    , pos_.y + CHA_HEIGHT / 2}, {pos_.x + CHA_WIDTH / 2, pos_.y                 },{pos_.x + CHA_WIDTH / 2, pos_.y + CHA_HEIGHT    } }  // 右向き
-    };
-
-    int dir = 0;
-    int color = GetColor(255, 255, 255); // デフォルトは白
-
-    switch (chaseMode_) {
-    case EnemyMode::RightHand:
-        dir = RightHandRule::forwardDir(forward_);
-        color = GetColor(255, 0, 0); // 赤 (右手法)
-        break;
-
-    case EnemyMode::LeftHand:
-        dir = LeftHandRule::forwardDir(forward_);
-        color = GetColor(0, 255, 0); // 緑 (左手法)
-        break;
-
-    case EnemyMode::AStar:
-        dir = 0; // A*は方向不要
-        color = GetColor(0, 0, 255); // 青 (A*)
-        break;
-
-    case EnemyMode::Random:
-        dir = forward_;
-        color = GetColor(255, 255, 255); // 白 (ランダム)
-        break;
-    }
-
-    //if (chaseMode_ != EnemyMode::AStar) { // A* は方向指示なし
-    //    DrawTriangle(tp[dir][0].x, tp[dir][0].y,
-    //        tp[dir][1].x, tp[dir][1].y,
-    //        tp[dir][2].x, tp[dir][2].y, color, TRUE);
-    //}
 }
 
 bool Enemy::CheckHit(const Rect& me, const Rect& other)
