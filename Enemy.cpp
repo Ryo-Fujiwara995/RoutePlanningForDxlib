@@ -13,72 +13,94 @@ namespace {
 }
 // 右手法
 namespace RightHandRule {
-	// 右手法での移動方向
-	const int dx[4] = { 1, 0, -1, 0 };
-	const int dy[4] = { 0, 1, 0, -1 };
+    // 右手法での移動方向
+    const int dx[4] = { 1, 0, -1, 0 };
+    const int dy[4] = { 0, 1, 0, -1 };
 
-	// 右手法での次の方向
+    // 右手法での次の方向
     int nextDir(int dir) {
-		return (dir + 3) % 4;
-	}
+        return (dir + 3) % 4;
+    }
 
-	// 右手法での前方の方向
+    // 右手法での前方の方向
     int forwardDir(int dir) {
-		return dir;
-	}
+        return dir;
+    }
 
-	// 右手法での左方向
+    // 右手法での左方向
     int leftDir(int dir) {
-		return (dir + 1) % 4;
-	}
+        return (dir + 1) % 4;
+    }
 
-	// 右手法での右方向
+    // 右手法での右方向
     int rightDir(int dir) {
-		return (dir + 3) % 4;
-	}
+        return (dir + 3) % 4;
+    }
 
-	// 右手法での移動
+    // 右手法での移動
     Point move(int x, int y, int dir) {
-		return { x + dx[dir], y + dy[dir] };
-	}
+        return { x + dx[dir], y + dy[dir] };
+    }
 
-	// 右手法での移動可能かどうか
+    // 右手法での移動可能かどうか
     bool canMove(int x, int y, int dir, Stage* stage) {
-		Point next = move(x, y, dir);
-		return stage->IsPassable(next.x, next.y);
-	}
+        Point next = move(x, y, dir);
+        return stage->IsPassable(next.x, next.y);
+    }
 
-	// 右手法での次の方向を探す
+    // 右手法での次の方向を探す
     int findNextDir(int x, int y, int dir, Stage* stage) {
         for (int i = 0; i < 4; i++) {
-			int next = rightDir(dir);
-			if (canMove(x, y, next, stage))
-				return next;
-			dir = next;
-		}
-		return -1;
-	}
+            int next = rightDir(dir);
+            if (canMove(x, y, next, stage))
+                return next;
+            dir = next;
+        }
+        return -1;
+    }
 
-	// 右手法での経路を求める
+    // 右手法での経路を求める
     std::vector<Point> findPath(Point start, Point goal, Stage* stage) {
-		std::vector<Point> path;
-		int x = start.x;
-		int y = start.y;
-		int dir = 0;
+        std::vector<Point> path;
+        int x = start.x;
+        int y = start.y;
+        int dir = 0;
         while (true) {
             path.push_back({ x, y });
+
+            // ゴールに到達したら終了
             if (x == goal.x && y == goal.y)
                 break;
-            int next = findNextDir(x, y, dir, stage);
-            if (next == -1)
-                break;
-            x += dx[next];
+
+            // 右手法に従って移動方向を決定
+            int right = rightDir(dir);
+            int forward = forwardDir(dir);
+            int left = leftDir(dir);
+
+            if (canMove(x, y, right, stage)) {
+                dir = right;
+            }
+            else if (canMove(x, y, forward, stage)) {
+                // そのまま前進
+            }
+            else if (canMove(x, y, left, stage)) {
+                dir = left;
+            }
+            else {
+                // どこにも進めない場合、180度回転
+                dir = (dir + 2) % 4;
+            }
+
+            // 次の位置へ移動
+            Point next = move(x, y, dir);
+            x = next.x;
+            y = next.y;
         }
         return path;
     }
-
 }
 
+// 右手やったから、途中まででいいかな
 // 左手法
 namespace LeftHandRule {
 
@@ -374,6 +396,7 @@ void Enemy::Update()
     }
     default:
         break;
+    }
         //    // 追尾モード: A*でPlayerまでの経路を求める
         //    Point enemyGrid = { pos_.x / CHA_WIDTH, pos_.y / CHA_HEIGHT };
         //    Point playerGrid = { playerPos.x / CHA_WIDTH, playerPos.y / CHA_HEIGHT };
@@ -452,7 +475,7 @@ void Enemy::Update()
         //        enemyRect = { pos_.x, pos_.y, CHA_WIDTH, CHA_HEIGHT };
         //    }
         //}
-    }
+    
 }
 
 void Enemy::Draw()
