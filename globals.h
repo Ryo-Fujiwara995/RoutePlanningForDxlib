@@ -19,6 +19,7 @@
 		bool operator<(const Point& other) const {
 			return (x < other.x) || (x == other.x && y < other.y);
 		}
+
 	};
 
 	struct Pointf
@@ -56,15 +57,18 @@
 	const int CHA_HEIGHT = 32;
 
 	// ¬•¶Žš‚¾‚Á‚½‚Ì‚ÅAŒã‚Å•ÏX
-	enum class EnemyMode {
-		Random,
-		RightHand,
-		LeftHand,
+	// enum class EnemyMode
+	enum ENEMYMODE {
+		RANDOM,
+		RIGHT_HAND,
+		LEFT_HAND,
 
-		Bfs,// breadth - first search ¨ •—Dæ’Tõ
-		Dfs,// depth - first search ¨ [‚³—Dæ’Tõ
-		
-		Dijkstra,// Dijkstra Algorithm
-		
-		AStar
+		BFS,// breadth - first search ¨ •—Dæ’Tõ
+		DFS,// depth - first search ¨ [‚³—Dæ’Tõ
+
+		DIJKSTRA,// Dijkstra Algorithm
+
+		ASTAR,
+
+		MAX_ENEMYMODE
 	};

@@ -2,7 +2,8 @@
 #include "./Source/Input.h"
 #include "./Stage.h"
 #include "globals.h"
-
+#include "ImGui/imgui.h"
+#include "Enemy.h"
 namespace {
 	DIR inputDir = NONE;
 }
@@ -87,6 +88,7 @@ void Player::Update()
 				//‚»‚êˆÈŠO‚Åˆø‚ÁŠ|‚©‚Á‚½Žž
 				pos_.x = ox;
 				pos_.y = oy;
+				break; // •Ç‚É“–‚½‚Á‚½‚çˆÚ“®‚ðƒLƒƒƒ“ƒZƒ‹
 			}
 		}
 	}
@@ -104,3 +106,6 @@ bool Player::CheckHit(const Rect& me, const Rect& other)
 	}
 	return false;
 }
+
+
+

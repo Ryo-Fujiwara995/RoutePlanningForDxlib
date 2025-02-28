@@ -22,7 +22,7 @@ private:
 
     //bool chaseMode_;  // true: A*によるPlayer追尾, false: ランダム移動
     //int modeTimer_;
-    EnemyMode chaseMode_; // ランダム、右手、左手、A*
+    ENEMYMODE chaseMode_; // ランダム、右手、左手、A*
 public:
     Enemy();
     ~Enemy();
