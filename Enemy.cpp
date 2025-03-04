@@ -6,17 +6,17 @@
 #include <algorithm>
 #include <cstdlib>
 #include <cmath>
-#include <queue>　// BreadthFirstSearch
-#include <map> // 
+#include <queue>
+#include <map>
 #include <stack>
 #include <string>
 #include "ImGui/imgui.h"
-//　ループはないよ
+//　ループなし
 
 namespace {
     Point nDir[4] = { {0, -1}, {0, 1}, {-1, 0}, {1, 0} };
 }
-// ランダム→右手と左手→幅優先→ダイクストラ→...の順でやったので、ランダムと右左は、追跡速度が一緒。他は、めちゃ速い。待つのもいや
+
 // 右手法
 namespace RightHandRule {
     // 右手法での移動方向
@@ -534,16 +534,6 @@ void Enemy::Imgui()
         ImGui::End();
         return;
     }
-
-    // //ラジオボタンもいいね
-    //for (int i = 0; i < ENEMYMODE_MAX; i++) {
-    //    if (ImGui::RadioButton(modeNames[i], chaseMode_ == (ENEMYMODE)i)) {
-    //        chaseMode_ = (ENEMYMODE)i;
-    //        pos_ = stage->GetRandomEmptyPosition();
-    //        path_.clear();
-    //        pathIndex_ = 0;
-    //    }
-    //}
     
     // ボタンを押してモード変更
     for (int i = 0; i < MAX_ENEMYMODE; i++) {
@@ -567,26 +557,6 @@ void Enemy::Update()
     Point playerPos = player->GetPosition();
     Point enemyGrid = { pos_.x / CHA_WIDTH, pos_.y / CHA_HEIGHT };
     Point playerGrid = { playerPos.x / CHA_WIDTH, playerPos.y / CHA_HEIGHT };
-
-    //int dx = pos_.x - playerPos.x;
-    //int dy = pos_.y - playerPos.y;
-    //int distSq = dx * dx + dy * dy;
-    //int chaseRange = 50;
-    //const int rangeThresholdSq = (chaseRange * CHA_WIDTH) * (chaseRange * CHA_WIDTH);
-
-    // ここで、確認したから多分、問題なし！！
-    //// 一定範囲内にプレイヤーがいる場合、chaseMode_で追跡
-    //if (distSq <= rangeThresholdSq) {
-    //    //chaseMode_ = EnemyMode::RightHand;
-    //    //chaseMode_ = EnemyMode::LeftHand;
-    //    //chaseMode_ = EnemyMode::Bfs;
-    //    chaseMode_ = EnemyMode::Dfs;
-    //    //chaseMode_ = EnemyMode::Dijkstra;
-    //    //chaseMode_ = EnemyMode::AStar;
-    //}
-    //else {
-    //    chaseMode_ = EnemyMode::Random;
-    //}
 
     Point oldPos = pos_;
     int enemySpeed = 1;
@@ -648,7 +618,7 @@ void Enemy::Update()
                     pos_.y = targetPixel.y;
             }
 
-            // 次のノードに到達したら、インデックスを進める
+            // 次のノードに到達したら、進める
             if (pos_.x == targetPixel.x && pos_.y == targetPixel.y) {
                 pathIndex_++;
             }
@@ -691,14 +661,14 @@ void Enemy::Update()
                     pos_.y = targetPixel.y;
             }
 
-            // 次のノードに到達したら、インデックスを進める
+            // 次のノードに到達したら、進める
             if (pos_.x == targetPixel.x && pos_.y == targetPixel.y) {
                 pathIndex_++;
             }
         }
         break;
     }
-    // 追尾速いけどいいか...
+
     case ENEMYMODE::BFS: {
         // 敵とプレイヤーのマス座標を取得
         Point enemyPos = { pos_.x / CHA_WIDTH, pos_.y / CHA_HEIGHT };
