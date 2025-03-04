@@ -56,17 +56,15 @@
 	const int CHA_WIDTH = 32;
 	const int CHA_HEIGHT = 32;
 
-	// ¬•¶š‚¾‚Á‚½‚Ì‚ÅAŒã‚Å•ÏX
-	// enum class EnemyMode
 	enum ENEMYMODE {
 		RANDOM,
 		RIGHT_HAND,
 		LEFT_HAND,
 
-		BFS,// breadth - first search ¨ •—Dæ’Tõ
-		DFS,// depth - first search ¨ [‚³—Dæ’Tõ
+		BFS,
+		DFS,
 
-		DIJKSTRA,// Dijkstra Algorithm
+		DIJKSTRA,
 
 		ASTAR,
 
