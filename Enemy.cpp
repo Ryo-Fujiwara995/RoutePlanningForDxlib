@@ -13,6 +13,9 @@
 #include "ImGui/imgui.h"
 //　ループはないよ
 
+// これくらいなら、文字化けしててもいいや
+// https://github.com/Ryo-Fujiwara995/RoutePlanningForDxlib/tree/AI_%E8%AA%B2%E9%A1%8C2 
+
 namespace {
     Point nDir[4] = { {0, -1}, {0, 1}, {-1, 0}, {1, 0} };
 }
